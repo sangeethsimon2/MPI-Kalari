@@ -1,4 +1,3 @@
-*.o
-build/*
-bin/*
+1DToyFD/build/
+1DToyFD/bin/
 

@@ -23,9 +23,22 @@ if (ENABLE_MPI)
   else()
     message(FATAL_ERROR "MPI Not Found")
   endif()
-# include_directories("${MPI_CXX_INCLUDE_DIRS}")
 endif()
 
-#add_subdirectory(src)
-add_subdirectory(app)
+add_executable( 1DFDToy )
+target_include_directories(1DFDToy PUBLIC "${PROJECT_SOURCE_DIR}/include")
+target_sources(1DFDToy PRIVATE
+               src/1DFDToy.cpp
+               src/allocateMemory.cpp
+               src/deAllocateMemory.cpp
+               src/computeArrayIndices.cpp
+)
 
+if(ENABLE_SERIAL)
+  target_compile_definitions(1DFDToy PRIVATE "ENABLE_SERIAL")
+endif()
+
+if(ENABLE_MPI)
+  target_link_libraries( 1DFDToy PRIVATE MPI::MPI_CXX )
+  target_compile_definitions(1DFDToy PRIVATE "ENABLE_MPI")
+endif()

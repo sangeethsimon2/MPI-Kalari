@@ -31,7 +31,8 @@ target_sources(1DFDToy PRIVATE
                src/1DFDToy.cpp
                src/allocateMemory.cpp
                src/deAllocateMemory.cpp
-               src/computeArrayIndices.cpp
+               src/MPIUtils.cpp
+               src/initialize.cpp
 )
 
 if(ENABLE_SERIAL)

@@ -15,4 +15,6 @@ constexpr int MASTER=0;
 
 void allocateMemory(std::vector<double>&, const int);
 void deAllocateMemory(std::vector<double>&);
-void computeIndexForEachRank(const int&, const int&, const int&, const int&, int&, int&);
+void computeArraySliceIndexForEachRank(const int&, const int&, const int&, const int&, int&, int&);
+void computeExchangeNeighbourIndexForEachRank(const int, const int, int&, int&);
+void initialize(std::vector<double>&, const int, const int, bool);

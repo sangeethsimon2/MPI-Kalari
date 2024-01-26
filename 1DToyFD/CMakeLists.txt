@@ -33,6 +33,7 @@ target_sources(1DFDToy PRIVATE
                src/deAllocateMemory.cpp
                src/MPIUtils.cpp
                src/initialize.cpp
+               src/updateVector.cpp
 )
 
 if(ENABLE_SERIAL)

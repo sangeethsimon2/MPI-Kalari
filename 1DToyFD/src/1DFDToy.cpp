@@ -63,8 +63,11 @@ int main(int argc, char **argv)
     MPI_Barrier(MPI_COMM_WORLD);
 
     while(iter<nIterations){
+
+        std::cout<<"Iteration: "<<iter<<std::endl;
         //Perform rank-boundary data exchanges
         //Issue Right data recv req for non-master ranks
+
        if(rank!=MASTER){
          //std::cout<<"I am rank "<<rank<<" recieving right data from "<<prevNeighbourIndex<<std::endl;
          MPI_Recv(&vecA[0], 1, MPI_DOUBLE, prevNeighbourIndex, rightInternalDataRecvTag, MPI_COMM_WORLD, &status);
@@ -95,13 +98,17 @@ int main(int argc, char **argv)
         MPI_Recv(&vecA[numberOfElementsOwnedByRank+1], 1, MPI_DOUBLE, nextNeighbourIndex, leftInternalDataRecvTag, MPI_COMM_WORLD, &status);
       }
 
+      std::cout<<"Finished Exchanging data across Rank boundaries\n";
 
-        // //Perform update of vecB based on values in vecA
+     //Perform update of vecA values
+     updateVector(vecA, numberOfElementsOwnedByRank);
 
-        //copy vecB into vecA
 
-        //increment the iteration index
-        iter++;
+     std::cout<<"Finished updating vector\n";
+
+
+     //increment the iteration index
+     iter++;
     }
 
     //End MPI

@@ -18,3 +18,4 @@ void deAllocateMemory(std::vector<double>&);
 void computeArraySliceIndexForEachRank(const int&, const int&, const int&, const int&, int&, int&, int&);
 void computeExchangeNeighbourIndexForEachRank(const int, const int, int&, int&);
 void initialize(std::vector<double>&, const int, const int, const int, bool);
+void updateVector(std::vector<double>&, const int);

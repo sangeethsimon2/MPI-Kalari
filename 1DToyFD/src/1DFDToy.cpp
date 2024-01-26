@@ -9,16 +9,13 @@ int main(int argc, char **argv)
     int rank, commSize;
     int arrayIndexBegin, arrayIndexEnd, numberOfElementsOwnedByRank;
     int nextNeighbourIndex, prevNeighbourIndex;
-    //int leftDataSendTag=0, rightDataSendTag=1, leftDataRecvTag=1, rightDataRecvTag=0;
     int leftPhysBoundDataSendTag =0, leftPhysBoundDataRecvTag=0;
     int rightPhysBoundDataSendTag =1, rightPhysBoundDataRecvTag=1;
     int leftInternalDataSendTag = 2, leftInternalDataRecvTag=2;
     int rightInternalDataSendTag=3, rightInternalDataRecvTag=3;
 
-
-
-    MPI_Request sendRequest1, sendRequest2, recvRequest1, recvRequest2;
     MPI_Status status;
+
 
     // error check on the input size
     if(std::atoi(argv[1])<=0){
@@ -100,15 +97,11 @@ int main(int argc, char **argv)
         //std::cout<<"I am rank "<<rank<<" recieving left data from "<<nextNeighbourIndex<<std::endl;
         MPI_Recv(&vecA[numberOfElementsOwnedByRank+1], 1, MPI_DOUBLE, nextNeighbourIndex, leftInternalDataRecvTag, MPI_COMM_WORLD, &status);
       }
-
       std::cout<<"Finished Exchanging data across Rank boundaries\n";
 
      //Perform update of vecA values
      updateVector(vecA, numberOfElementsOwnedByRank);
-
-
      std::cout<<"Finished updating vector\n";
-
 
      //increment the iteration index
      iter++;
@@ -118,32 +111,35 @@ int main(int argc, char **argv)
     for(int i=1, j=0; i<=numberOfElementsOwnedByRank;++i, ++j ){
         vecAResized[j] = vecA[i];
     }
+    //Add a barrier to allow all ranks to finish copying
     MPI_Barrier(MPI_COMM_WORLD);
 
+    //Allocate final vector to store the whole array
     if(rank==MASTER){
         allocateMemory(vecAFull, std::atoi(argv[1]));
 
     }
-    std::cout<<"rank "<<rank<<" address= "<<vecAFull.data()+arrayIndexBegin<<"\n";
+    //Initiate gather option from all ranks
     MPI_Gather(vecAResized.data(), numberOfElementsOwnedByRank, MPI_DOUBLE, vecAFull.data()+arrayIndexBegin, numberOfElementsOwnedByRank, MPI_DOUBLE, MASTER, MPI_COMM_WORLD);
 
-
+    #ifdef DEBUGPRINT
+    // error check print
     if(rank==MASTER){
-
      std::cout<<" Rank "<<rank<<std::endl;
      for(int i=0;i<numberOfElementsOwnedByRank;i++){
-        std::cout<<"chunk element["<<i<<"]="<<vecAResized[i]<<std::endl;
-    }
-    for(int i=0;i<std::atoi(argv[1]);i++){
-        std::cout<<"element["<<i<<"]="<<vecAFull[i]<<std::endl;
-    }
+       std::cout<<"chunk element["<<i<<"]="<<vecAResized[i]<<std::endl;
+     }
+     for(int i=0;i<std::atoi(argv[1]);i++){
+      std::cout<<"element["<<i<<"]="<<vecAFull[i]<<std::endl;
+     }
     }
     else{
-     std::cout<<" Rank "<<rank<<std::endl;
-     for(int i=0;i<numberOfElementsOwnedByRank;i++){
+      std::cout<<" Rank "<<rank<<std::endl;
+      for(int i=0;i<numberOfElementsOwnedByRank;i++){
         std::cout<<"chunk element["<<i<<"]="<<vecAResized[i]<<std::endl;
+      }
     }
-    }
+    #endif
 
 
     //End MPI

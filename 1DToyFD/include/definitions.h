@@ -13,6 +13,8 @@
 constexpr int MASTER=0;
 
 
+
+
 void allocateMemory(std::vector<double>&, const int);
 void deAllocateMemory(std::vector<double>&);
 void computeArraySliceIndexForEachRank(const int&, const int&, const int&, const int&, int&, int&, int&);

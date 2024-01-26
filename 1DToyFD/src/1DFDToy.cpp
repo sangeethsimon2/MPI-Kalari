@@ -37,6 +37,8 @@ int main(int argc, char **argv)
     //Create arrays to store the values
     std::vector<double> vecA;
     std::vector<double> vecB;
+    std::vector<double> vecAResized;
+    std::vector<double> vecAFull;
 
 
     //Initialize MPI
@@ -53,6 +55,7 @@ int main(int argc, char **argv)
 
 	//std::cout<<"rank="<<rank<<" nextNeigbourIndex="<<nextNeighbourIndex<<" prevNeighbourIndex="<<prevNeighbourIndex<<std::endl;
     allocateMemory(vecA,numberOfElementsOwnedByRank+2);
+    allocateMemory(vecAResized, numberOfElementsOwnedByRank);
     allocateMemory(vecB,numberOfElementsOwnedByRank+2);
 	std::cout<<" Finished allocating memory\n";
 
@@ -111,11 +114,44 @@ int main(int argc, char **argv)
      iter++;
     }
 
+    //Resize the vec chunks (strip away the ghost pts) and copy the internal data alone
+    for(int i=1, j=0; i<=numberOfElementsOwnedByRank;++i, ++j ){
+        vecAResized[j] = vecA[i];
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    if(rank==MASTER){
+        allocateMemory(vecAFull, std::atoi(argv[1]));
+
+    }
+    std::cout<<"rank "<<rank<<" address= "<<vecAFull.data()+arrayIndexBegin<<"\n";
+    MPI_Gather(vecAResized.data(), numberOfElementsOwnedByRank, MPI_DOUBLE, vecAFull.data()+arrayIndexBegin, numberOfElementsOwnedByRank, MPI_DOUBLE, MASTER, MPI_COMM_WORLD);
+
+
+    if(rank==MASTER){
+
+     std::cout<<" Rank "<<rank<<std::endl;
+     for(int i=0;i<numberOfElementsOwnedByRank;i++){
+        std::cout<<"chunk element["<<i<<"]="<<vecAResized[i]<<std::endl;
+    }
+    for(int i=0;i<std::atoi(argv[1]);i++){
+        std::cout<<"element["<<i<<"]="<<vecAFull[i]<<std::endl;
+    }
+    }
+    else{
+     std::cout<<" Rank "<<rank<<std::endl;
+     for(int i=0;i<numberOfElementsOwnedByRank;i++){
+        std::cout<<"chunk element["<<i<<"]="<<vecAResized[i]<<std::endl;
+    }
+    }
+
+
     //End MPI
 	MPI_Finalize();
-
     deAllocateMemory(vecA);
+    deAllocateMemory(vecAResized);
     deAllocateMemory(vecB);
+    deAllocateMemory(vecAFull);
 
 	std::cout<<" Finished de-allocating memory\n";
     return(0);
